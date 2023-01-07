@@ -7,10 +7,10 @@ LSTVECM <- function(y_dat, k_y_, vnames_y_, ys_addtr_, vnames_ad_, vname_th_, p_
     dmax_ <- dmax__
     l_diff <- l_diff_
     delay <- delay_
-    c_rank<- c_rank_
-    coin_vec<- coin_vec_
-    restrc<- restrc_
-    restrt<- restrt_
+    c_rank <- c_rank_
+    coin_vec <- coin_vec_
+    restrc <- restrc_
+    restrt <- restrt_
     vnames_y <- vnames_y_
     vnames_ad <- vnames_ad_
     vname_th <- vname_th_
@@ -25,5 +25,24 @@ LSTVECM <- function(y_dat, k_y_, vnames_y_, ys_addtr_, vnames_ad_, vname_th_, p_
 ## k_y is number of variables in system
 ## k_addtr is number of exogenous candidate transition variables 
 
+k_tr <- k_y
+
+#  k_y is number of variables in system
+#  k_addtr is number of exogenous candidate transition variables 
+
+#  T_est is number of observations in the estimation sample.
+
+diff_ <- 1
+p_dmax <- max(c(p_max,dmax_))
+max_diff <- maxc(c(diff_,l_diff))
+T_est <- nobs-p_dmax-max_diff
+
+# Construct data-matrix #
+
+y <- matrix()
+y <- y_dat
+
+ys <- y[1:nrow(y_dat), 1:k_y]
+deter <- cbind(rep(1, T_est), seq(1, T_est))
 
 }
