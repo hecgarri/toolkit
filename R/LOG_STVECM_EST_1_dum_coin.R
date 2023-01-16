@@ -45,4 +45,20 @@ y <- y_dat
 ys <- y[1:nrow(y_dat), 1:k_y]
 deter <- cbind(rep(1, T_est), seq(1, T_est))
 
+# Crear matriz de datos
+ysd <- ys[2:(T_est+p_dmax+1), 1:k_y] - ys[1:(T_est+p_dmax), 1:k_y]
+dat <- ysd[(p_dmax+1):(T_est+p_dmax), ]
+beta <- t(coin_vec)
+
+# Crear elemento determinista
+if (restrc && !restrt) {
+  det <- deter[, 1]
+} else if (restrt && restrc) {
+  det <- deter[, 1:2]
+} else if (restrt && !restrc) {
+  det <- deter[, 2]
+} else if (!restrt && !restrc) {
+  det <- data.frame()
+}
+
 }
