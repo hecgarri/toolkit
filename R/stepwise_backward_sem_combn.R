@@ -1,34 +1,20 @@
-#' @title Selección paso a paso hacia atrás de combinaciones SEM
-#' @name stepwise_backward_sem_combn
-#' @description Una clase para realizar la selección paso a paso hacia atrás de variables en los modelos SEM y almacenar el modelo final y las estadísticas de ajuste
-#' @slot datos Un data frame que contiene los datos
-#' @slot vars_pos Un vector de caracteres que contiene las variables a considerar en el análisis
-#' @slot estadisticos_ajuste Un data frame que contiene las estadísticas de ajuste para cada combinación de variables consideradas
-#' @slot modelo_final La combinación de variables seleccionadas con las mejores estadísticas de ajuste
-#' @export
+#' @title Stepwise backward selection of SEM combinations
+#' @description A class for performing stepwise backward selection of variables in SEM models and storing the final model and fit statistics.
+#' @param datos A data frame containing the data
+#' @param vars_pos A character vector containing the variables to consider in the analysis.
+#' @export stepwise_backward_sem_combn
+#' @return An object of class stepwise_backward_sem_combn which contains the final model, fit statistics and input data.
+#' @method print, function to print the final model and fit statistics
+#' @method estadisticos_ajuste, function to extract the fit statistics data frame
+#' @import lavaan
+#' @note The function uses the 'lavaan' package. Make sure to have it installed before using the function.
 #' @examples
 #' data(holzingerSwineford1939)
 #' vars_pos <- names(holzingerSwineford1939)[1:8]
 #' modelo <- stepwise_backward_sem_combn(holzingerSwineford1939, vars_pos)
 #' print(modelo)
-#' @rdname stepwise_backward_sem_combn
-#' @import lavaan
-#' @importFrom combn combn
-#' @exportClass stepwise_backward_sem_combn
-#' @method initialize function to initialize the class
-#' @method print function to print the final model and fit statistics
-#' @method estadisticos_ajuste function to extract the fit statistics data frame
-#' @exportMethod stepwise_backward_sem_combn function to perform stepwise backward selection of variables in SEM models
-#' @exportMethod estadisticos_ajuste
-#' @param datos A data frame containing the data
-#' @param vars_pos A character vector containing the variables to consider in the analysis
-#' @return An object of class stepwise_backward_sem_combn which contains the final model, fit statistics and input data
-#' @details
-#' The stepwise_backward_sem_combn function performs a stepwise backward selection of variables in SEM models by generating all possible combinations of variables, fitting a SEM model for each combination, and calculating fit statistics such as CFI, TLI, and RMSEA. The combination with the best fit statistics is selected as the final model. The function returns an object of class stepwise_backward_sem_combn which contains the final model, fit statistics, and input data. The object also has print, estadisticos_ajuste methods.
-#' @note
-#' The stepwise_backward_sem_combn function uses the 'lavaan' and 'combn' packages. Make sure to have them installed before using the function.
-#' The function assumes that the input data is in the correct format, it's the user's responsibility to check the input before using the function.
 
+if(!require(lavaan)){install.packages("lavaan")}
 
 setClass("stepwise_backward_sem_combn", representation(
   datos = "data.frame",
@@ -37,7 +23,10 @@ setClass("stepwise_backward_sem_combn", representation(
   modelo_final = "character"
 ))
 
-setMethod("initialize", "stepwise_backward_sem_combn", function(.Object, datos, vars_pos) {
+setGeneric("stepwise_backward_sem_combn", function(datos, vars_pos) standardGeneric("stepwise_backward_sem_combn"))
+
+setMethod("stepwise_backward_sem_combn", "stepwise_backward_sem_combn", function(datos, vars_pos) {
+
   # Verifica que los datos sean un data frame
   if (!is.data.frame(datos)) {
     stop("Los datos deben ser un data frame.")
@@ -47,10 +36,18 @@ setMethod("initialize", "stepwise_backward_sem_combn", function(.Object, datos, 
   if (!is.character(vars_pos)) {
     stop("vars_pos debe ser un vector de caracteres.")
   }
-  
-  # Asigna los datos y variables a las slots del objeto
-  .Object@datos <- datos
-  .Object@vars_pos <- vars_pos
+
+    # Verifica que las variables especificadas en vars_pos existan en el data frame
+  vars_inexistentes <- setdiff(vars_pos, colnames(datos))
+  if (length(vars_inexistentes) > 0) {
+    stop(paste("Las siguientes variables no existen en el data frame: ", paste(vars_inexistentes, collapse = ", ")))
+  }
+
+  # Verifica que las variables especificadas en vars_pos tengan valores numéricos válidos
+  vars_no_numéricas <- vars_pos[sapply(datos[vars_pos], is.numeric) == FALSE]
+  if (length(vars_no_numéricas) > 0) {
+    stop(paste("Las siguientes variables no son numéricas: ", paste(vars_no_numéricas, collapse = ", ")))
+  }
   
   # Inicializa un data frame para almacenar los resultados de los estadísticos de bondad de ajuste
   estadisticos_ajuste <- data.frame(modelo = character(), CFI = numeric(), TLI = numeric(), RMSEA = numeric())
@@ -75,15 +72,14 @@ setMethod("initialize", "stepwise_backward_sem_combn", function(.Object, datos, 
   }
   
   # Selecciona la combinación con las mejores estadísticas de ajuste
-  mejor_combinacion <- estadisticos_ajuste[which.max(estadisticos_ajuste$CFI), "modelo"]
+  modelo_final <- estadisticos_ajuste[which.max(estadisticos_ajuste$CFI), "modelo"]
   
-  .Object@estadisticos_ajuste <- estadisticos_ajuste
-  .Object@modelo_final <- mejor_combinacion
+  # Guardar el modelo final y las estadísticas de ajuste en un objeto de la clase stepwise_backward_sem_combn
+  objeto <- new("stepwise_backward_sem_combn", datos = datos, vars_pos = vars_pos, estadisticos_ajuste = estadisticos_ajuste, modelo_final = modelo_final)
   
-  return(.Object)
+  return(objeto)
+  
 })
-
-
 
 setMethod("print", "stepwise_backward_sem_combn", function(x) {
   cat("Modelo final: ", x@modelo_final, "\n")
@@ -91,6 +87,8 @@ setMethod("print", "stepwise_backward_sem_combn", function(x) {
   print(x@estadisticos_ajuste)
 })
 
+setGeneric("estadisticos_ajuste", function(x) standardGeneric("estadisticos_ajuste"))
+setGeneric("modelo_final", function(x) standardGeneric("modelo_final"))
 
 setMethod("estadisticos_ajuste", "stepwise_backward_sem_combn", function(x) {
   x@estadisticos_ajuste
@@ -100,15 +98,17 @@ setMethod("modelo_final", "stepwise_backward_sem_combn", function(x) {
   return(x@modelo_final)
 })
 
-setMethod("plot", "stepwise_backward_sem_combn", function(object) {
-  library(ggplot2)
-  ggplot(object@estadisticos_ajuste, aes(x = modelo, y = CFI, fill = modelo)) +
-    geom_bar(stat = "identity", position = "dodge") +
-    geom_bar(aes(x = modelo, y = TLI, fill = modelo), stat = "identity", position = "dodge") +
-    geom_bar(aes(x = modelo, y = RMSEA, fill = modelo), stat = "identity", position = "dodge") +
-    ylim(0,1) +
-    labs(x = "Modelo", y = "Estadística de ajuste", fill = "Modelo") +
-    theme_bw()
-})
+# setGeneric("plot", function(x, ...) standardGeneric("plot"))
+
+# setMethod("plot", "stepwise_backward_sem_combn", function(object) {
+#   library(ggplot2)
+#   ggplot(object@estadisticos_ajuste, aes(x = modelo, y = CFI, fill = modelo)) +
+#     geom_bar(stat = "identity", position = "dodge") +
+#     geom_bar(aes(x = modelo, y = TLI, fill = modelo), stat = "identity", position = "dodge") +
+#     geom_bar(aes(x = modelo, y = RMSEA, fill = modelo), stat = "identity", position = "dodge") +
+#     ylim(0,1) +
+#     labs(x = "Modelo", y = "Estadística de ajuste", fill = "Modelo") +
+#     theme_bw()
+# })
 
 
