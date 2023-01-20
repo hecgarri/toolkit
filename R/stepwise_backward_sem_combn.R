@@ -2,19 +2,20 @@
 #' @description A class for performing stepwise backward selection of variables in SEM models and storing the final model and fit statistics.
 #' @param datos A data frame containing the data
 #' @param vars_pos A character vector containing the variables to consider in the analysis.
-#' @export stepwise_backward_sem_combn
+#' @export stepwise_backward_sem_combn, plot
 #' @return An object of class stepwise_backward_sem_combn which contains the final model, fit statistics and input data.
-#' @method print, function to print the final model and fit statistics
-#' @method estadisticos_ajuste, function to extract the fit statistics data frame
-#' @import lavaan
-#' @note The function uses the 'lavaan' package. Make sure to have it installed before using the function.
+#' @method print stepwise_backward_sem_combn
+#' @method estadisticos_ajuste stepwise_backward_sem_combn
+#' @method plot stepwise_backward_sem_combn
+#' @import lavaan, ggplot2, cowplot
+#' @note The function uses the 'lavaan', 'ggplot2', and 'cowplot' package. Make sure to have it installed before using the function.
 #' @examples
 #' data(holzingerSwineford1939)
 #' vars_pos <- names(holzingerSwineford1939)[1:8]
 #' modelo <- stepwise_backward_sem_combn(holzingerSwineford1939, vars_pos)
 #' print(modelo)
+#' plot(modelo)
 
-if(!require(lavaan)){install.packages("lavaan")}
 
 setClass("stepwise_backward_sem_combn", representation(
   datos = "data.frame",
@@ -98,17 +99,33 @@ setMethod("modelo_final", "stepwise_backward_sem_combn", function(x) {
   return(x@modelo_final)
 })
 
-# setGeneric("plot", function(x, ...) standardGeneric("plot"))
+setGeneric("plot", function(x, ...) standardGeneric("plot"))
 
-# setMethod("plot", "stepwise_backward_sem_combn", function(object) {
-#   library(ggplot2)
-#   ggplot(object@estadisticos_ajuste, aes(x = modelo, y = CFI, fill = modelo)) +
-#     geom_bar(stat = "identity", position = "dodge") +
-#     geom_bar(aes(x = modelo, y = TLI, fill = modelo), stat = "identity", position = "dodge") +
-#     geom_bar(aes(x = modelo, y = RMSEA, fill = modelo), stat = "identity", position = "dodge") +
-#     ylim(0,1) +
-#     labs(x = "Modelo", y = "Estadística de ajuste", fill = "Modelo") +
-#     theme_bw()
-# })
+setMethod("plot", "stepwise_backward_sem_combn", function(x, object) {
+    library(ggplot2)
+    library(cowplot)
+
+    # Create separate plots for each statistic
+    plot_CFI <- ggplot(object@estadisticos_ajuste, aes(x = modelo, y = CFI, fill = modelo)) +
+        geom_bar(stat = "identity", position = "dodge") +
+        ylim(0, 1) +
+        labs(x = "Modelo", y = "CFI", fill = "Modelo") +
+        theme_bw()
+
+    plot_TLI <- ggplot(object@estadisticos_ajuste, aes(x = modelo, y = TLI, fill = modelo)) +
+        geom_bar(stat = "identity", position = "dodge") +
+        ylim(0, 1) +
+        labs(x = "Modelo", y = "TLI", fill = "Modelo") +
+        theme_bw()
+
+    plot_RMSEA <- ggplot(object@estadisticos_ajuste, aes(x = modelo, y = RMSEA, fill = modelo)) +
+        geom_bar(stat = "identity", position = "dodge") +
+        ylim(0, 1) +
+        labs(x = "Modelo", y = "RMSEA", fill = "Modelo") +
+        theme_bw()
+
+    # Combine the plots using cowplot
+    plot_grid(plot_CFI, plot_TLI, plot_RMSEA, ncol = 3, align = "h", axis = "tb", axis_size = unit(0, "cm"))
+})
 
 
