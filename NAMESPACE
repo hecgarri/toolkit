@@ -10,3 +10,5 @@ export(procesar_datos_mayorista)
 import("ggplot2")
 import("lavaan")
 import("cowplot")
+
+
