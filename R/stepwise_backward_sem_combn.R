@@ -27,9 +27,9 @@ setRefClass("stepwise_backward_sem_combn", representation(
   modelo_final = "character"
 ))
 
-setGeneric("stepwise_backward_sem_combn", function(datos, vars_pos, formula,...) standardGeneric("stepwise_backward_sem_combn"))
+setGeneric("stepwise_backward_sem_combn", function(object, formula,...) standardGeneric("stepwise_backward_sem_combn"))
 
-setMethod("stepwise_backward_sem_combn", "stepwise_backward_sem_combn", function(datos, vars_pos, formula,...) {
+setMethod("stepwise_backward_sem_combn", "stepwise_backward_sem_combn", function(object, formula,...) {
 
   # Verifica que los datos sean un data frame
   if (!is.data.frame(datos)) {

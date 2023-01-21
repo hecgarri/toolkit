@@ -15,6 +15,7 @@ An object of class stepwise_backward_sem_combn which contains the final model, f
 \description{
 A class for performing stepwise backward selection of variables in SEM models and storing the final model and fit statistics.
 }
+
 \note{
 The function uses the 'lavaan', 'ggplot2', and 'cowplot' package. Make sure to have it installed before using the function.
 }
