@@ -2,12 +2,15 @@
 #' @description A class for performing stepwise backward selection of variables in SEM models and storing the final model and fit statistics.
 #' @param datos A data frame containing the data
 #' @param vars_pos A character vector containing the variables to consider in the analysis.
-#' @export stepwise_backward_sem_combn, plot
+#' @export stepwise_backward_sem_combn
+#' @export plot
 #' @return An object of class stepwise_backward_sem_combn which contains the final model, fit statistics and input data.
 #' @method print stepwise_backward_sem_combn
 #' @method estadisticos_ajuste stepwise_backward_sem_combn
 #' @method plot stepwise_backward_sem_combn
-#' @import lavaan, ggplot2, cowplot
+#' @import "lavaan"
+#' @import "ggplot2"
+#' @import "cowplot"
 #' @note The function uses the 'lavaan', 'ggplot2', and 'cowplot' package. Make sure to have it installed before using the function.
 #' @examples
 #' data(holzingerSwineford1939)
@@ -24,9 +27,9 @@ setClass("stepwise_backward_sem_combn", representation(
   modelo_final = "character"
 ))
 
-setGeneric("stepwise_backward_sem_combn", function(datos, vars_pos) standardGeneric("stepwise_backward_sem_combn"))
+setGeneric("stepwise_backward_sem_combn", function(datos, vars_pos, formula,...) standardGeneric("stepwise_backward_sem_combn"))
 
-setMethod("stepwise_backward_sem_combn", "stepwise_backward_sem_combn", function(datos, vars_pos) {
+setMethod("stepwise_backward_sem_combn", "stepwise_backward_sem_combn", function(datos, vars_pos, formula,...) {
 
   # Verifica que los datos sean un data frame
   if (!is.data.frame(datos)) {
@@ -36,6 +39,10 @@ setMethod("stepwise_backward_sem_combn", "stepwise_backward_sem_combn", function
   # Verifica que vars_pos sea un vector de caracteres
   if (!is.character(vars_pos)) {
     stop("vars_pos debe ser un vector de caracteres.")
+  }
+  # Verifica que formula sea un vector de caracteres
+  if (!is.character(vars_pos)) {
+    stop("formula debe ser un vector de caracteres.")
   }
 
     # Verifica que las variables especificadas en vars_pos existan en el data frame
@@ -53,24 +60,24 @@ setMethod("stepwise_backward_sem_combn", "stepwise_backward_sem_combn", function
   # Inicializa un data frame para almacenar los resultados de los estadísticos de bondad de ajuste
   estadisticos_ajuste <- data.frame(modelo = character(), CFI = numeric(), TLI = numeric(), RMSEA = numeric())
   
-  # Genera todas las combinaciones posibles de variables
-  combinaciones <- expand.grid(vars_pos)
-  
-  # Itera sobre las combinaciones
-  for (i in 1:ncol(combinaciones)) {
-    combinacion <- combinaciones[, i]
+# Genera todas las combinaciones posibles de variables
+vars_combn <- list()
+for (i in 2:9) {
+  combinaciones <- vars_combn[[i-1]]
+  for (j in 1:ncol(combinaciones)) {
+    combinacion <- combinaciones[, j]
     # Crea la fórmula para el modelo SEM con la combinación actual
-    formula <- paste(combinacion, collapse = " ~ ")
+    formula <- paste("POS", "=~", paste(combinacion, collapse = "+"), "\n", formula)
     # Ajusta el modelo SEM con los datos
-    modelo <- sem(formula, data = datos)
+    modelo <- sem(formula, data = datos,...)
 
     # Obtiene las estadísticas de bondad de ajuste
     cfi <- lavaan::fitMeasures(modelo)$cfi
-    tli <- lavaan::fitMeasures(modelo)$tli
     rmsea <- lavaan::fitMeasures(modelo)$rmsea
     # Guarda las estadísticas en el data frame
-    estadisticos_ajuste <- rbind(estadisticos_ajuste, data.frame(modelo = paste(combinacion, collapse = " ~ "), CFI = cfi, TLI = tli, RMSEA = rmsea))
+    estadisticos_ajuste <- rbind(estadisticos_ajuste, data.frame(modelo = paste(combinacion, collapse = " ~ "), CFI = cfi, RMSEA = rmsea))
   }
+}
   
   # Selecciona la combinación con las mejores estadísticas de ajuste
   modelo_final <- estadisticos_ajuste[which.max(estadisticos_ajuste$CFI), "modelo"]

@@ -1,5 +1,5 @@
 Package: toolkit
-Title: What the Package Does (One Line, Title Case)
+Title: Herramientas para modelar ecuaciones estructurales
 Version: 0.0.0.9000
 Authors@R: 
     person("Hector", "Garrido", , "hectorgarridohenriquez@gmail.com", role = c("aut", "cre"),
@@ -10,3 +10,7 @@ License: `use_mit_license()`, `use_gpl3_license()` or friends to pick a
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.2.2
+Imports:
+    ggplot2,
+    lavaan
+
