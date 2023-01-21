@@ -71,8 +71,9 @@ for (i in 2:length(vars_pos)) {
     modelo <- sem(formula, data = datos,...)
 
     # Obtiene las estadísticas de bondad de ajuste
-    cfi <- lavaan::fitMeasures(modelo)$cfi
-    rmsea <- lavaan::fitMeasures(modelo)$rmsea
+    # Obtiene las estadísticas de bondad de ajuste
+    cfi <- lavaan::fitMeasures(modelo, "cfi")
+    rmsea <- lavaan::fitMeasures(modelo, "rmsea")
     # Guarda las estadísticas en el data frame
     estadisticos_ajuste <- rbind(estadisticos_ajuste, data.frame(modelo = paste(combinacion, collapse = " ~ "), CFI = cfi, RMSEA = rmsea))
   }
