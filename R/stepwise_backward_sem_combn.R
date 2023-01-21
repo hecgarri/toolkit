@@ -61,21 +61,23 @@ setMethod("stepwise_backward_sem_combn", "stepwise_backward_sem_combn", function
   estadisticos_ajuste <- data.frame(modelo = character(), CFI = numeric(), TLI = numeric(), RMSEA = numeric())
   
 # Genera todas las combinaciones posibles de variables
-for (i in 2:length(vars_pos)) {
+vars_combn <- list()
+for (i in 1:(length(vars_pos)-1)) {
   combinaciones <- t(combn(vars_pos, i))
   for (j in 1:nrow(combinaciones)) {
-    combinacion <- combinaciones[j,]
+    combinacion <- combinaciones[j, ]
     # Crea la fórmula para el modelo SEM con la combinación actual
-    formula <- paste("POS", "=~", paste(combinacion, collapse = "+"), "\n", formula)
+    formula1 <- paste("POS", "=~", paste(combinacion, collapse = "+"), "\n", formula)
     # Ajusta el modelo SEM con los datos
-    modelo <- sem(formula, data = datos,...)
+    modelo <- sem(formula, data = datos)
 
     # Obtiene las estadísticas de bondad de ajuste
-    # Obtiene las estadísticas de bondad de ajuste
-    cfi <- lavaan::fitMeasures(modelo, "cfi")
-    rmsea <- lavaan::fitMeasures(modelo, "rmsea")
+    cfi <- fitMeasures(modelo, "cfi")
+    tli <- fitMeasures(modelo, "tli")
+    rmsea <- fitMeasures(modelo, "rmsea")
+
     # Guarda las estadísticas en el data frame
-    estadisticos_ajuste <- rbind(estadisticos_ajuste, data.frame(modelo = paste(combinacion, collapse = " ~ "), CFI = cfi, RMSEA = rmsea))
+    estadisticos_ajuste <- rbind(estadisticos_ajuste, data.frame(modelo = paste(combinacion, collapse = " ~ "), CFI = cfi, TLI = tli, RMSEA = rmsea))
   }
 }
   
