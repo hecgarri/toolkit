@@ -61,11 +61,10 @@ setMethod("stepwise_backward_sem_combn", "stepwise_backward_sem_combn", function
   estadisticos_ajuste <- data.frame(modelo = character(), CFI = numeric(), TLI = numeric(), RMSEA = numeric())
   
 # Genera todas las combinaciones posibles de variables
-vars_combn <- list(vars_pos)
-for (i in 2:9) {
-  combinaciones <- vars_combn[[i-1]]
-  for (j in 1:ncol(combinaciones)) {
-    combinacion <- combinaciones[, j]
+for (i in 2:length(vars_pos)) {
+  combinaciones <- t(combn(vars_pos, i))
+  for (j in 1:nrow(combinaciones)) {
+    combinacion <- combinaciones[j,]
     # Crea la fórmula para el modelo SEM con la combinación actual
     formula <- paste("POS", "=~", paste(combinacion, collapse = "+"), "\n", formula)
     # Ajusta el modelo SEM con los datos
