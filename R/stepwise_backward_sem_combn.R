@@ -20,7 +20,7 @@
 #' plot(modelo)
 
 
-setClass("stepwise_backward_sem_combn", representation(
+setRefClass("stepwise_backward_sem_combn", representation(
   datos = "data.frame",
   vars_pos = "character",
   estadisticos_ajuste = "data.frame",
