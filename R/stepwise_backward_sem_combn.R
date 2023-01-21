@@ -69,7 +69,7 @@ for (i in 1:(length(vars_pos)-1)) {
     # Crea la fórmula para el modelo SEM con la combinación actual
     formula1 <- paste("POS", "=~", paste(combinacion, collapse = "+"), "\n", formula)
     # Ajusta el modelo SEM con los datos
-    modelo <- sem(formula, data = datos)
+    modelo <- sem(formula1, data = datos)
 
     # Obtiene las estadísticas de bondad de ajuste
     cfi <- fitMeasures(modelo, "cfi")
