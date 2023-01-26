@@ -72,6 +72,8 @@ for (i in 1:(length(vars_pos)-1)) {
     modelo <- sem(formula1, data = datos)
 
     # Obtiene las estadísticas de bondad de ajuste
+    chisq <- fitMeasures(modelo, "chisq")
+    df <- fitMeasures(modelo, "df")
     cfi <- fitMeasures(modelo, "cfi")
     tli <- fitMeasures(modelo, "tli")
     rmsea <- fitMeasures(modelo, "rmsea")
